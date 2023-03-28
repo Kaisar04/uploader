@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Uploader</title>
 </head>
 <body>
 <h1>Uploader</h1>
 <p>Upload your file here and wait for a response</p>
-<form action="http://127.0.0.1:8000/upload/" enctype="multipart/form-data" method="post">
+<form action="/upload" enctype="multipart/form-data" method="post">
     <input name="file" type="file" multiple>
     <input type="submit">
 </form>
