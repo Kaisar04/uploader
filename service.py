@@ -1,14 +1,18 @@
-from credentials import access_key, secret_access_key
 import boto3
 from boto3.s3.transfer import TransferConfig
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-session = boto3.session.Session()
+access_key = os.getenv('ACCESS_KEY')
+secret_access_key = os.getenv('SECRET_ACCESS_KEY')
+bucket_name = os.getenv('BUCKET_NAME')
 
-
-bucket_name = 'qaisarymsaq-files'
 GB = 1024 ** 3
 MB = 1024 ** 2
+
+session = boto3.session.Session()
 
 
 async def upload_file(file):
