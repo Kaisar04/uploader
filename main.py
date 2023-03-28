@@ -25,3 +25,4 @@ async def upload(
 ):
     await upload_file(file)
     return Response(status_code=200, content="Successfully uploaded")
+
