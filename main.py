@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Request, Response
+from fastapi import FastAPI, UploadFile, File, Request, Response, status
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from service import upload_file
@@ -23,6 +23,9 @@ async def get_page(request: Request):
 async def upload(
         file: UploadFile = File(...)
 ):
-    await upload_file(file)
+    try:
+        await upload_file(file)
+    except Exception:
+        return {"message": "Something went wrong"}
     return Response(status_code=200, content="Successfully uploaded")
 
