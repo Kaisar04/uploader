@@ -23,9 +23,11 @@ async def get_page(request: Request):
 async def upload(
         file: UploadFile = File(...)
 ):
-    try:
-        await upload_file(file)
-    except Exception:
-        return {"message": "Something went wrong"}
-    return Response(status_code=200, content="Successfully uploaded")
+    for chunk in file.file:
+        print(chunk)
+    # try:
+    #     await parallel_multithreading_upload(file)
+    # except Exception:
+    #     return {"message": "Something went wrong"}
+    # return Response(status_code=200, content="Successfully uploaded")
 
