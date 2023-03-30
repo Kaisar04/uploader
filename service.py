@@ -12,10 +12,9 @@ bucket_name = os.getenv('BUCKET_NAME')
 GB = 1024 ** 3
 MB = 1024 ** 2
 
-session = boto3.session.Session()
-
 
 async def upload_file(file):
+    session = boto3.session.Session()
     config = TransferConfig(multipart_threshold=400 * MB,
                             max_concurrency=10,
                             multipart_chunksize=50 * MB,
