@@ -31,15 +31,22 @@ async def read_chunk(file):
         yield data
 
 
-def get(index, chunk):
-    print(len(chunk), index)
-    return index
+def upload_file(client, multipart, index, chunk):
+    response = client.upload_part(
+        Body=chunk,
+        Bucket=bucket_name,
+        Key='largeobject',
+        PartNumber=index,
+        UploadId=multipart['UploadId'],
+    )
+
+    return response
 
 
-async def call_comp(loop, index, chunk):
+async def call_comp(loop, client, response, index, chunk):
     print('called an executor')
     r = None
-    r = await loop.run_in_executor(None, get, index, chunk)
+    r = await loop.run_in_executor(None, upload_file, client, response, index, chunk)
     return r
 
 
@@ -57,15 +64,35 @@ async def get_page(request: Request):
 async def upload(
         file: UploadFile = File(...)
 ):
+    session = boto3.session.Session()
+    client = session.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_access_key)
+    response = client.create_multipart_upload(
+        Bucket=bucket_name,
+        Key='largeobject',
+    )
+
     tasks = []
     loop = asyncio.get_event_loop()
     index = 0
     async for chunk in read_chunk(file):
         index += 1
         tasks.append(asyncio.create_task(
-            call_comp(loop, index, chunk)
+            call_comp(loop, client, response, index, chunk)
         ))
     results = await asyncio.gather(*tasks)
-    return results
+
+    part_info = {
+        'Parts': [
+            {
+                'PartNumber': 1,
+                'ETag': part['ETag']
+            }
+        ]
+    }
+
+    complete = client.complete_multipart_upload(Bucket=bucket_name, Key='largeobject', UploadId=mpu['UploadId'],
+                                 MultipartUpload=part_info)
+
+    return complete
 
 
