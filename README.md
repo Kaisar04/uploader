@@ -2,10 +2,10 @@
 aws s3 uploader
 
 
-#### config = TransferConfig(...) - конфигурация отвечает за многокомпонентную загрузку с несколькими потоками.
-#### multipart_threshold - атрибут задает максимальный размер файла при котором отработает многопоточность.
-#### max_concurrency - атрибут задает количество потоков. Количество потоков по умолчанию - 10. Задаем на основе мощностей машины. 
-#### multipart_chunksize - атрибут задает размер частей файлов (chunk)
-#### use_threads - атрибут активирует многопоточность
-#### Reference:
-https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3.html
+### 1. create_multipart_upload.
+### 2. upload_part.
+### 3. complete_multipart_upload.
+### Reference:
+1. https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_multipart_upload.html
+2. https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/upload_part.html
+3. https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/complete_multipart_upload.html
