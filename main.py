@@ -31,22 +31,22 @@ async def read_chunk(file):
         yield data
 
 
-def upload_file(client, multipart, index, chunk):
+def upload_file(client, multipart, filename, index, chunk):
     response = client.upload_part(
         Body=chunk,
         Bucket=bucket_name,
-        Key='largeobject',
+        Key=filename,
         PartNumber=index,
         UploadId=multipart['UploadId'],
     )
 
-    return zip(index, response['eTag'])
+    return index, response['ETag'].replace('"', '')
 
 
-async def call_comp(loop, client, response, index, chunk):
-    print('called an executor')
+async def process(loop, client, response, filename, index, chunk):
+    print('upload is on process')
     r = None
-    r = await loop.run_in_executor(None, upload_file, client, response, index, chunk)
+    r = await loop.run_in_executor(None, upload_file, client, response, filename, index, chunk)
     return r
 
 
@@ -68,7 +68,7 @@ async def upload(
     client = session.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_access_key)
     response = client.create_multipart_upload(
         Bucket=bucket_name,
-        Key='largeobject',
+        Key=file.filename,
     )
 
     tasks = []
@@ -77,16 +77,12 @@ async def upload(
     async for chunk in read_chunk(file):
         index += 1
         tasks.append(asyncio.create_task(
-            call_comp(loop, client, response, index, chunk)
+            process(loop, client, response, file.filename, index, chunk)
         ))
     results = await asyncio.gather(*tasks)
-    # results = [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]
+
     part_info = {
         'Parts': [
-            # {
-            #     'PartNumber': part[0],
-            #     'ETag': part[1]
-            # }
         ]
     }
 
@@ -98,9 +94,11 @@ async def upload(
             }
         )
 
-    complete = client.complete_multipart_upload(Bucket=bucket_name, Key='largeobject', UploadId=response['UploadId'],
-                                 MultipartUpload=part_info)
+    complete = client.complete_multipart_upload(
+        Bucket=bucket_name,
+        Key=file.filename,
+        UploadId=response['UploadId'],
+        MultipartUpload=part_info
+    )
 
     return complete
-
-
