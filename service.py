@@ -1,9 +1,7 @@
 import boto3
-from boto3.s3.transfer import TransferConfig
 import os
 from dotenv import load_dotenv
-from concurrent import futures
-from concurrent.futures import ThreadPoolExecutor
+
 
 load_dotenv()
 
