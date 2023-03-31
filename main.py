@@ -25,7 +25,7 @@ templates = Jinja2Templates(directory='templates')
 
 async def read_chunk(file):
     while True:
-        data = await file.read(400 * MB)
+        data = await file.read(100 * MB)
         if not data:
             break
         yield data
