@@ -40,7 +40,7 @@ def upload_file(client, multipart, index, chunk):
         UploadId=multipart['UploadId'],
     )
 
-    return response
+    return zip(index, response['eTag'])
 
 
 async def call_comp(loop, client, response, index, chunk):
@@ -80,17 +80,25 @@ async def upload(
             call_comp(loop, client, response, index, chunk)
         ))
     results = await asyncio.gather(*tasks)
-
+    # results = [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]
     part_info = {
         'Parts': [
-            {
-                'PartNumber': 1,
-                'ETag': part['ETag']
-            }
+            # {
+            #     'PartNumber': part[0],
+            #     'ETag': part[1]
+            # }
         ]
     }
 
-    complete = client.complete_multipart_upload(Bucket=bucket_name, Key='largeobject', UploadId=mpu['UploadId'],
+    for part in results:
+        part_info['Parts'].append(
+            {
+                'PartNumber': part[0],
+                'ETag': part[1]
+            }
+        )
+
+    complete = client.complete_multipart_upload(Bucket=bucket_name, Key='largeobject', UploadId=response['UploadId'],
                                  MultipartUpload=part_info)
 
     return complete
